@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"gee-bee/internal/configuration"
+)
 
 func main() {
-	fmt.Println("We've spotted a plane you are watching!")
+	configuration.GetConfig()
 }
