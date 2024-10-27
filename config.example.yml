@@ -3,4 +3,4 @@ discordWebhookUrl: https://discord.com/api/webhooks/12345/abcdef-ghijkl
 fetchInterval: 60
 logPlanesToConsole: true
 slackWebhookUrl: https://hooks.slack.com/services/random/ids/andstrings
-tailNumbers: 28000, 29000
+tailNumbers: 28000,29000
