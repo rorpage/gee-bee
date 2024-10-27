@@ -9,10 +9,11 @@ import (
 )
 
 var (
-	DiscordWebhookURL  string
+	CustomWebhookUrl   string
+	DiscordWebhookUrl  string
 	FetchInterval      int
 	LogPlanesToConsole bool
-	SlackWebhookURL    string
+	SlackWebhookUrl    string
 	TailNumbers        []string
 )
 
@@ -21,13 +22,15 @@ const (
 	defaultFetchInterval int = 60
 
 	// Config IDs
-	config_discordWebHookUrl  string = "discordWebHookUrl"
+	config_customWebhookUrl   string = "customWebhookUrl"
+	config_discordWebhookUrl  string = "discordWebhookUrl"
 	config_fetchInterval      string = "fetchInterval"
 	config_logPlanesToConsole string = "logPlanesToConsole"
 	config_slackWebhookUrl    string = "slackWebhookUrl"
 	config_tailNumbers        string = "tailNumbers"
 
 	// Environment variables
+	env_customWebhookUrl   string = "CUSTOM_WEBHOOK_URL"
 	env_discordWebHookUrl  string = "DISCORD_WEBHOOK_URL"
 	env_fetchInterval      string = "FETCH_INTERVAL"
 	env_logPlanesToConsole string = "LOG_PLANES_TO_CONSOLE"
@@ -38,14 +41,20 @@ const (
 func GetConfig() {
 	var err error
 
-	viper.SetDefault(config_discordWebHookUrl, "")
+	viper.SetDefault(config_customWebhookUrl, "")
+	viper.SetDefault(config_discordWebhookUrl, "")
 	viper.SetDefault(config_fetchInterval, defaultFetchInterval)
 	viper.SetDefault(config_logPlanesToConsole, true)
 	viper.SetDefault(config_slackWebhookUrl, "")
 	viper.SetDefault(config_tailNumbers, []string{"28000", "29000"})
 
 	// Bind the Viper key to an associated environment variable name
-	err = viper.BindEnv(config_discordWebHookUrl, env_discordWebHookUrl)
+	err = viper.BindEnv(config_customWebhookUrl, env_customWebhookUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindEnv(config_discordWebhookUrl, env_discordWebHookUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,10 +91,11 @@ func GetConfig() {
 		}
 	}
 
-	DiscordWebhookURL = viper.GetString(config_discordWebHookUrl)
+	CustomWebhookUrl = viper.GetString(config_customWebhookUrl)
+	DiscordWebhookUrl = viper.GetString(config_discordWebhookUrl)
 	FetchInterval = viper.GetInt(config_fetchInterval)
 	LogPlanesToConsole = viper.GetBool(config_logPlanesToConsole)
-	SlackWebhookURL = viper.GetString(config_slackWebhookUrl)
+	SlackWebhookUrl = viper.GetString(config_slackWebhookUrl)
 
 	tailNumbers := viper.GetString(config_tailNumbers)
 	TailNumbers = strings.Split(strings.ToUpper(strings.ReplaceAll(tailNumbers, " ", "")), ",")
