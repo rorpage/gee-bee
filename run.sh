@@ -1,3 +1,3 @@
 #!/bin/bash
 
-go run cmd/gee-bee/*
+go run cmd/geebee/*
