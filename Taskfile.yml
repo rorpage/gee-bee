@@ -5,6 +5,10 @@ tasks:
     cmds:
       - go build -o gee-bee.exe cmd/geebee/*
 
+  format:
+    cmds:
+      - gofmt -s -w .
+
   run:
     cmds:
       - go run cmd/geebee/*
