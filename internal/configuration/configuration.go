@@ -13,6 +13,7 @@ var (
 	DiscordWebhookUrl  string
 	FetchInterval      int
 	LogPlanesToConsole bool
+	MetricsPort        int
 	SlackWebhookUrl    string
 	TailNumbers        []string
 )
@@ -20,12 +21,14 @@ var (
 const (
 	// Defaults
 	defaultFetchInterval int = 60
+	defaultMetricsPort   int = 9090
 
 	// Config IDs
 	config_customWebhookUrl   string = "customWebhookUrl"
 	config_discordWebhookUrl  string = "discordWebhookUrl"
 	config_fetchInterval      string = "fetchInterval"
 	config_logPlanesToConsole string = "logPlanesToConsole"
+	config_metricsPort        string = "metricsPort"
 	config_slackWebhookUrl    string = "slackWebhookUrl"
 	config_tailNumbers        string = "tailNumbers"
 
@@ -34,6 +37,7 @@ const (
 	env_discordWebHookUrl  string = "DISCORD_WEBHOOK_URL"
 	env_fetchInterval      string = "FETCH_INTERVAL"
 	env_logPlanesToConsole string = "LOG_PLANES_TO_CONSOLE"
+	env_metricsPort        string = "METRICS_PORT"
 	env_slackWebhookUrl    string = "SLACK_WEBHOOK_URL"
 	env_tailNumbers        string = "TAIL_NUMBERS"
 )
@@ -45,6 +49,7 @@ func GetConfig() {
 	viper.SetDefault(config_discordWebhookUrl, "")
 	viper.SetDefault(config_fetchInterval, defaultFetchInterval)
 	viper.SetDefault(config_logPlanesToConsole, true)
+	viper.SetDefault(config_metricsPort, defaultMetricsPort)
 	viper.SetDefault(config_slackWebhookUrl, "")
 	viper.SetDefault(config_tailNumbers, []string{"28000", "29000"})
 
@@ -65,6 +70,11 @@ func GetConfig() {
 	}
 
 	err = viper.BindEnv(config_logPlanesToConsole, env_logPlanesToConsole)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindEnv(config_metricsPort, env_metricsPort)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,6 +105,7 @@ func GetConfig() {
 	DiscordWebhookUrl = viper.GetString(config_discordWebhookUrl)
 	FetchInterval = viper.GetInt(config_fetchInterval)
 	LogPlanesToConsole = viper.GetBool(config_logPlanesToConsole)
+	MetricsPort = viper.GetInt(config_metricsPort)
 	SlackWebhookUrl = viper.GetString(config_slackWebhookUrl)
 
 	tailNumbers := viper.GetString(config_tailNumbers)

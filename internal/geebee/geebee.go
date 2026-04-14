@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"geebee/internal/configuration"
+	"geebee/internal/metrics"
 	"geebee/internal/planespotter"
 
 	"github.com/jftuga/geodist"
@@ -93,8 +94,10 @@ func validateAircraft(allFilteredAircraft []Aircraft, alreadySpottedAircraft *[]
 func HandleAircraft(alreadySpottedAircraft *[]Aircraft) (aircraft []AircraftOutput, err error) {
 	var newlySpottedAircraft []Aircraft
 
+	metrics.APICallsTotal.Inc()
 	allAircraftInRange, err := checkAircraft()
 	if err != nil {
+		metrics.APIErrorsTotal.Inc()
 		return nil, err
 	}
 

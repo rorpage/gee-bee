@@ -3,6 +3,7 @@ package main
 import (
 	"geebee/internal/configuration"
 	"geebee/internal/geebee"
+	"geebee/internal/metrics"
 	"geebee/internal/notification"
 	"log"
 	"time"
@@ -29,12 +30,17 @@ func sendNotifications(aircraft []geebee.AircraftOutput) error {
 		return nil
 	}
 
+	for _, ac := range aircraft {
+		metrics.AircraftSpottedTotal.WithLabelValues(ac.Registration).Inc()
+	}
+
 	// Custom URL
 	if configuration.CustomWebhookUrl != "" {
 		err := notification.SendCustomUrlMessage(aircraft)
 		if err != nil {
 			return err
 		}
+		metrics.NotificationsSentTotal.WithLabelValues("custom_url").Inc()
 	}
 
 	// Discord
@@ -43,6 +49,7 @@ func sendNotifications(aircraft []geebee.AircraftOutput) error {
 		if err != nil {
 			return err
 		}
+		metrics.NotificationsSentTotal.WithLabelValues("discord").Inc()
 	}
 
 	// Slack
@@ -51,10 +58,12 @@ func sendNotifications(aircraft []geebee.AircraftOutput) error {
 		if err != nil {
 			return err
 		}
+		metrics.NotificationsSentTotal.WithLabelValues("slack").Inc()
 	}
 
 	// Terminal
 	notification.SendTerminalMessage(aircraft)
+	metrics.NotificationsSentTotal.WithLabelValues("terminal").Inc()
 
 	return nil
 }
@@ -73,6 +82,8 @@ func HandleGeeBee() {
 
 func main() {
 	configuration.GetConfig()
+
+	metrics.StartServer(configuration.MetricsPort)
 
 	HandleGeeBee()
 }
