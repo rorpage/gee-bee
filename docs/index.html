@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gee Bee – Airplane Tail Number Tracker</title>
+    <style>
+      :root {
+        --sky: #0d6efd;
+        --sky-dark: #0a58ca;
+        --bg: #f8f9fa;
+        --card-bg: #ffffff;
+        --text: #212529;
+        --muted: #6c757d;
+        --border: #dee2e6;
+        --code-bg: #f1f3f5;
+        --accent: #198754;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.65;
+      }
+
+      /* ── Hero ── */
+      header {
+        background: linear-gradient(135deg, #0d3b8e 0%, #0d6efd 100%);
+        color: #fff;
+        text-align: center;
+        padding: 4rem 1.5rem 3rem;
+      }
+
+      header .emoji {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      header h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+
+      header p.tagline {
+        font-size: 1.25rem;
+        opacity: 0.9;
+        margin-top: 0.75rem;
+        max-width: 520px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 0.6rem 1.4rem;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: opacity 0.15s;
+      }
+
+      .btn:hover {
+        opacity: 0.85;
+      }
+
+      .btn-white {
+        background: #fff;
+        color: var(--sky);
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 2px solid rgba(255, 255, 255, 0.7);
+        color: #fff;
+      }
+
+      /* ── Layout ── */
+      main {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem;
+      }
+
+      section {
+        margin-bottom: 3.5rem;
+      }
+
+      h2 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--sky-dark);
+        border-bottom: 2px solid var(--border);
+        padding-bottom: 0.4rem;
+        margin-bottom: 1.25rem;
+      }
+
+      h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      p {
+        margin-bottom: 0.85rem;
+      }
+
+      a {
+        color: var(--sky);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      /* ── Cards ── */
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.25rem;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.25rem 1.4rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      }
+
+      .card .icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+
+      .card h3 {
+        margin-top: 0;
+        font-size: 1rem;
+      }
+
+      .card p {
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      /* ── Code ── */
+      pre,
+      code {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
+          monospace;
+        font-size: 0.875rem;
+      }
+
+      code {
+        background: var(--code-bg);
+        border-radius: 4px;
+        padding: 0.15em 0.4em;
+      }
+
+      pre {
+        background: #1e2330;
+        color: #cdd9e5;
+        border-radius: 8px;
+        padding: 1.1rem 1.4rem;
+        overflow-x: auto;
+        margin: 0.75rem 0 1.25rem;
+      }
+
+      pre code {
+        background: transparent;
+        padding: 0;
+        color: inherit;
+      }
+
+      /* ── Table ── */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+        margin: 0.75rem 0 1.25rem;
+      }
+
+      thead th {
+        background: var(--sky);
+        color: #fff;
+        text-align: left;
+        padding: 0.6rem 0.9rem;
+      }
+
+      tbody tr:nth-child(even) {
+        background: var(--code-bg);
+      }
+
+      tbody td {
+        padding: 0.55rem 0.9rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+
+      tbody td:first-child {
+        font-family: "SFMono-Regular", Consolas, monospace;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+
+      /* ── Callout ── */
+      .callout {
+        background: #e8f4fd;
+        border-left: 4px solid var(--sky);
+        border-radius: 6px;
+        padding: 0.9rem 1.2rem;
+        margin: 1rem 0;
+        font-size: 0.92rem;
+        color: #0a3d6b;
+      }
+
+      /* ── Footer ── */
+      footer {
+        text-align: center;
+        padding: 2rem 1rem 3rem;
+        color: var(--muted);
+        font-size: 0.875rem;
+        border-top: 1px solid var(--border);
+      }
+
+      footer a {
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ── Hero ── -->
+    <header>
+      <span class="emoji">✈️</span>
+      <h1>Gee Bee</h1>
+      <p class="tagline">
+        An app that alerts you when it detects specific airplane tail numbers in
+        flight.
+      </p>
+      <div class="btn-group">
+        <a
+          href="https://github.com/rorpage/gee-bee"
+          class="btn btn-white"
+          target="_blank"
+          rel="noopener"
+          >GitHub Repository</a
+        >
+        <a
+          href="https://github.com/rorpage/gee-bee/releases"
+          class="btn btn-outline"
+          target="_blank"
+          rel="noopener"
+          >Releases</a
+        >
+      </div>
+    </header>
+
+    <main>
+      <!-- ── About ── -->
+      <section id="about">
+        <h2>About</h2>
+        <p>
+          <strong>Gee Bee</strong> is a lightweight Go application that
+          continuously polls live flight data from
+          <a href="https://adsb.one" target="_blank" rel="noopener">ADSB.one</a>
+          and fires a notification whenever one of your watched tail numbers
+          takes to the skies. It supports Discord, Slack, and any custom
+          webhook.
+        </p>
+        <p>
+          Gee Bee is heavily inspired by and shares logic with
+          <a
+            href="https://github.com/vvanouytsel/jetspotter"
+            target="_blank"
+            rel="noopener"
+            >Jetspotter</a
+          >
+          by
+          <a
+            href="https://github.com/vvanouytsel"
+            target="_blank"
+            rel="noopener"
+            >Vincent Van Ouytsel</a
+          >. Many thanks for the excellent foundation!
+        </p>
+        <div class="cards">
+          <div class="card">
+            <span class="icon">🔍</span>
+            <h3>Live Flight Tracking</h3>
+            <p>
+              Queries the ADSB.one API on a configurable interval to track
+              specific registrations.
+            </p>
+          </div>
+          <div class="card">
+            <span class="icon">🔔</span>
+            <h3>Multi-channel Alerts</h3>
+            <p>
+              Push notifications to Discord, Slack, or any custom HTTP
+              endpoint.
+            </p>
+          </div>
+          <div class="card">
+            <span class="icon">🐳</span>
+            <h3>Docker Ready</h3>
+            <p>
+              A production-ready Docker image is built and published
+              automatically on every commit to <code>main</code>.
+            </p>
+          </div>
+          <div class="card">
+            <span class="icon">⚙️</span>
+            <h3>Flexible Config</h3>
+            <p>
+              Configure via a YAML file or plain environment variables – ideal
+              for containers and CI pipelines.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Quick Start ── -->
+      <section id="quickstart">
+        <h2>Quick Start</h2>
+
+        <h3>1 – Clone and configure</h3>
+        <pre><code>git clone https://github.com/rorpage/gee-bee.git
+cd gee-bee
+cp config.example.yml config.yml
+# Edit config.yml with your tail numbers and webhook URLs</code></pre>
+
+        <h3>2 – Run</h3>
+        <pre><code>task run</code></pre>
+        <p>
+          Or with the Go tool directly:
+        </p>
+        <pre><code>go run cmd/geebee/*</code></pre>
+
+        <h3>3 – Build</h3>
+        <pre><code>task build   # produces gee-bee.exe</code></pre>
+
+        <div class="callout">
+          💡 <strong>No config file?</strong> Sensible defaults are baked in.
+          You can testdrive the app without any configuration by running it
+          directly.
+        </div>
+      </section>
+
+      <!-- ── Docker ── -->
+      <section id="docker">
+        <h2>Docker</h2>
+        <p>
+          A pre-built image is published to the GitHub Container Registry on
+          every push to <code>main</code>. Pull and run it with:
+        </p>
+        <pre><code>docker run --rm \
+  -e TAIL_NUMBERS="28000,29000" \
+  -e DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/…" \
+  ghcr.io/rorpage/gee-bee:latest</code></pre>
+
+        <p>Or with Docker Compose:</p>
+        <pre><code>services:
+  gee-bee:
+    image: ghcr.io/rorpage/gee-bee:latest
+    environment:
+      TAIL_NUMBERS: "28000,29000"
+      DISCORD_WEBHOOK_URL: "https://discord.com/api/webhooks/…"
+      FETCH_INTERVAL: "60"
+    restart: unless-stopped</code></pre>
+      </section>
+
+      <!-- ── Configuration ── -->
+      <section id="configuration">
+        <h2>Configuration</h2>
+        <p>
+          Values can be set in a <code>config.yml</code> /
+          <code>config.yaml</code> file placed next to the binary, or via
+          environment variables. Environment variables take precedence.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Config key / Env var</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>tailNumbers</code><br /><code>TAIL_NUMBERS</code>
+              </td>
+              <td><code>28000,29000</code></td>
+              <td>
+                Comma-separated list of aircraft registrations (tail numbers) to
+                watch.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>fetchInterval</code><br /><code>FETCH_INTERVAL</code>
+              </td>
+              <td><code>60</code></td>
+              <td>
+                How often (in seconds) to poll the flight API. Values below 60
+                may trigger rate limits.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>logPlanesToConsole</code
+                ><br /><code>LOG_PLANES_TO_CONSOLE</code>
+              </td>
+              <td><code>true</code></td>
+              <td>Print spotted aircraft details to stdout.</td>
+            </tr>
+            <tr>
+              <td>
+                <code>discordWebhookUrl</code
+                ><br /><code>DISCORD_WEBHOOK_URL</code>
+              </td>
+              <td><em>empty</em></td>
+              <td>Discord incoming-webhook URL for notifications.</td>
+            </tr>
+            <tr>
+              <td>
+                <code>slackWebhookUrl</code><br /><code>SLACK_WEBHOOK_URL</code>
+              </td>
+              <td><em>empty</em></td>
+              <td>Slack incoming-webhook URL for notifications.</td>
+            </tr>
+            <tr>
+              <td>
+                <code>customWebhookUrl</code
+                ><br /><code>CUSTOM_WEBHOOK_URL</code>
+              </td>
+              <td><em>empty</em></td>
+              <td>
+                Any HTTP endpoint that accepts a JSON POST. See the
+                <a href="#custom-webhook">Custom Webhook</a> section for the
+                payload shape.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Example config.yml</h3>
+        <pre><code>tailNumbers: 28000,29000
+fetchInterval: 60
+logPlanesToConsole: true
+discordWebhookUrl: https://discord.com/api/webhooks/12345/abcdef-ghijkl
+slackWebhookUrl: https://hooks.slack.com/services/random/ids/andstrings
+customWebhookUrl: https://your-custom-url.com/endpoint</code></pre>
+      </section>
+
+      <!-- ── Notifications ── -->
+      <section id="notifications">
+        <h2>Notifications</h2>
+
+        <h3>Discord</h3>
+        <p>
+          Set <code>discordWebhookUrl</code> to a valid Discord
+          <a
+            href="https://support.discord.com/hc/en-us/articles/228383668"
+            target="_blank"
+            rel="noopener"
+            >Incoming Webhook</a
+          >
+          URL. Gee Bee posts a rich embed for each spotted aircraft containing
+          callsign, registration, speed, altitude, heading, aircraft type,
+          owner/operator, and a thumbnail image when available.
+        </p>
+
+        <h3>Slack</h3>
+        <p>
+          Set <code>slackWebhookUrl</code> to a Slack
+          <a
+            href="https://api.slack.com/messaging/webhooks"
+            target="_blank"
+            rel="noopener"
+            >Incoming Webhook</a
+          >
+          URL. Notifications use Slack's Block Kit for clean, structured
+          messages.
+        </p>
+
+        <h3 id="custom-webhook">Custom Webhook</h3>
+        <p>
+          Set <code>customWebhookUrl</code> to any URL that accepts an HTTP POST
+          with a JSON body. Gee Bee sends the following payload per spotted
+          aircraft:
+        </p>
+        <pre><code>{
+  "altitude":      "3,200 m",
+  "callsign":      "AF001",
+  "description":   "Boeing 747-400",
+  "heading":       "270°",
+  "imageUrl":      "https://…",
+  "ownerOperator": "Air France",
+  "speed":         "900 km/h",
+  "squawk":        "1234",
+  "tailNumber":    "F-GITD",
+  "type":          "B744",
+  "url":           "https://globe.adsbexchange.com/…"
+}</code></pre>
+      </section>
+
+      <!-- ── Taskfile ── -->
+      <section id="taskfile">
+        <h2>Taskfile Commands</h2>
+        <p>
+          Gee Bee uses
+          <a href="https://taskfile.dev" target="_blank" rel="noopener"
+            >Task</a
+          >
+          as its task runner. Install it once and use the following commands:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>task build</code></td>
+              <td>Compile the app to a <code>gee-bee.exe</code> binary.</td>
+            </tr>
+            <tr>
+              <td><code>task format</code></td>
+              <td>
+                Run <code>gofmt -s -w .</code> to format all Go source files.
+              </td>
+            </tr>
+            <tr>
+              <td><code>task run</code></td>
+              <td>
+                Run the app directly with <code>go run</code>, reading
+                configuration from <code>config.yml</code> or env vars.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ── License ── -->
+      <section id="license">
+        <h2>License</h2>
+        <p>
+          Gee Bee is released under the
+          <a
+            href="https://github.com/rorpage/gee-bee/blob/main/LICENSE"
+            target="_blank"
+            rel="noopener"
+            >MIT License</a
+          >.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Built with ❤️ by
+        <a href="https://github.com/rorpage" target="_blank" rel="noopener"
+          >rorpage</a
+        >
+        &nbsp;·&nbsp;
+        <a
+          href="https://github.com/rorpage/gee-bee"
+          target="_blank"
+          rel="noopener"
+          >View on GitHub</a
+        >
+      </p>
+    </footer>
+  </body>
+</html>
