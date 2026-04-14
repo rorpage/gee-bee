@@ -12,8 +12,8 @@ func exitWithError(err error) {
 	log.Fatalf("An error occurred: %v\n", err)
 }
 
-func geebeeHandler(alreadySpottedAircraft *[]geebee.Aircraft) {
-	aircraft, err := geebee.HandleAircraft(alreadySpottedAircraft)
+func geebeeHandler(spotted map[string]bool) {
+	aircraft, err := geebee.HandleAircraft(spotted)
 	if err != nil {
 		exitWithError(err)
 	}
@@ -62,10 +62,10 @@ func sendNotifications(aircraft []geebee.AircraftOutput) error {
 func HandleGeeBee() {
 	log.Printf("Watching for the following tail numbers: %s", configuration.TailNumbers)
 
-	var alreadySpottedAircraft []geebee.Aircraft
+	spotted := map[string]bool{}
 
 	for {
-		geebeeHandler(&alreadySpottedAircraft)
+		geebeeHandler(spotted)
 
 		time.Sleep(time.Duration(configuration.FetchInterval) * time.Second)
 	}

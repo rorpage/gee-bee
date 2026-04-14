@@ -53,58 +53,31 @@ func checkAircraft() (aircraft []Aircraft, err error) {
 	return flightData.AC, nil
 }
 
-func newlySpotted(aircraft Aircraft, spottedAircraft []Aircraft) bool {
-	return !containsAircraft(aircraft, spottedAircraft)
-}
-
-func containsAircraft(aircraft Aircraft, aircraftList []Aircraft) bool {
-	for _, ac := range aircraftList {
-		if ac.ICAO == aircraft.ICAO {
-			return true
-		}
-	}
-
-	return false
-}
-
-func updateSpottedAircraft(alreadySpottedAircraft, filteredAircraft []Aircraft) (aircraft []Aircraft) {
-	for _, ac := range alreadySpottedAircraft {
-		if containsAircraft(ac, filteredAircraft) {
-			aircraft = append(aircraft, ac)
-		}
-	}
-
-	return aircraft
-}
-
-func validateAircraft(allFilteredAircraft []Aircraft, alreadySpottedAircraft *[]Aircraft) (newlySpottedAircraft, updatedSpottedAircraft []Aircraft) {
-	for _, ac := range allFilteredAircraft {
-		if newlySpotted(ac, *alreadySpottedAircraft) {
-			newlySpottedAircraft = append(newlySpottedAircraft, ac)
-			*alreadySpottedAircraft = append(*alreadySpottedAircraft, ac)
-		}
-	}
-
-	*alreadySpottedAircraft = updateSpottedAircraft(*alreadySpottedAircraft, allFilteredAircraft)
-
-	return newlySpottedAircraft, *alreadySpottedAircraft
-}
-
-func HandleAircraft(alreadySpottedAircraft *[]Aircraft) (aircraft []AircraftOutput, err error) {
-	var newlySpottedAircraft []Aircraft
-
+func HandleAircraft(spotted map[string]bool) ([]AircraftOutput, error) {
 	allAircraftInRange, err := checkAircraft()
 	if err != nil {
 		return nil, err
 	}
 
-	newlySpottedAircraft, *alreadySpottedAircraft = validateAircraft(allAircraftInRange, alreadySpottedAircraft)
-	newlySpottedAircraftOutput, err := CreateAircraftOutput(newlySpottedAircraft)
-	if err != nil {
-		return nil, err
+	// Collect aircraft seen for the first time this cycle.
+	var newlySpotted []Aircraft
+	current := make(map[string]bool, len(allAircraftInRange))
+	for _, ac := range allAircraftInRange {
+		current[ac.ICAO] = true
+		if !spotted[ac.ICAO] {
+			spotted[ac.ICAO] = true
+			newlySpotted = append(newlySpotted, ac)
+		}
 	}
 
-	return newlySpottedAircraftOutput, nil
+	// Evict aircraft that are no longer in range so they trigger an alert if they return.
+	for icao := range spotted {
+		if !current[icao] {
+			delete(spotted, icao)
+		}
+	}
+
+	return CreateAircraftOutput(newlySpotted)
 }
 
 func isAircraftMilitary(aircraft Aircraft) bool {
