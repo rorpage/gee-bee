@@ -281,12 +281,15 @@
       <section id="about">
         <h2>About</h2>
         <p>
-          <strong>Gee Bee</strong> is a lightweight Go application that
-          continuously polls live flight data from
-          <a href="https://adsb.one" target="_blank" rel="noopener">ADSB.one</a>
-          and fires a notification whenever one of your watched tail numbers
-          takes to the skies. It supports Discord, Slack, and any custom
-          webhook.
+          <strong>Gee Bee</strong> is a one-shot Go binary for home servers.
+          Each run it checks live flight data from
+          <a href="https://www.adsbexchange.com/" target="_blank" rel="noopener"
+            >ADS-B Exchange</a
+          >
+          for a list of tail numbers you care about and fires a notification
+          the moment one of them shows up on radar. No sighting goes
+          unnoticed; no notification repeats while the aircraft stays in
+          range. It supports Discord, Slack, and any custom webhook.
         </p>
         <p>
           Gee Bee is heavily inspired by and shares logic with
@@ -309,8 +312,8 @@
             <span class="icon">🔍</span>
             <h3>Live Flight Tracking</h3>
             <p>
-              Queries the ADSB.one API on a configurable interval to track
-              specific registrations.
+              Queries ADS-B Exchange for a list of registrations you care
+              about, one run at a time.
             </p>
           </div>
           <div class="card">
@@ -322,21 +325,61 @@
             </p>
           </div>
           <div class="card">
-            <span class="icon">🐳</span>
-            <h3>Docker Ready</h3>
+            <span class="icon">📦</span>
+            <h3>Single Static Binary</h3>
             <p>
-              A production-ready Docker image is built and published
-              automatically on every commit to <code>main</code>.
+              No runtime dependencies and no Docker required. Download a
+              pre-built binary and schedule it with cron or systemd.
             </p>
           </div>
           <div class="card">
             <span class="icon">⚙️</span>
             <h3>Flexible Config</h3>
             <p>
-              Configure via a YAML file or plain environment variables – ideal
-              for containers and CI pipelines.
+              Configure via a YAML file or plain environment variables –
+              every field has a matching env var override.
             </p>
           </div>
+        </div>
+      </section>
+
+      <!-- ── Installation ── -->
+      <section id="installation">
+        <h2>Installation</h2>
+
+        <h3>Download a pre-built binary (recommended)</h3>
+        <p>
+          Grab the binary for your platform from the
+          <a
+            href="https://github.com/rorpage/gee-bee/releases"
+            target="_blank"
+            rel="noopener"
+            >Releases</a
+          >
+          page:
+        </p>
+        <pre><code># Example: Linux x86-64
+curl -fsSL https://github.com/rorpage/gee-bee/releases/latest/download/gee-bee-linux-amd64 \
+  -o /usr/local/bin/gee-bee
+chmod +x /usr/local/bin/gee-bee</code></pre>
+        <p>
+          Binaries are also published for <code>linux-arm64</code> (Raspberry
+          Pi, etc.), <code>darwin-amd64</code>, <code>darwin-arm64</code>, and
+          <code>windows-amd64</code>.
+        </p>
+
+        <h3>Build from source</h3>
+        <p>Requires Go 1.23+.</p>
+        <pre><code>git clone https://github.com/rorpage/gee-bee.git
+cd gee-bee
+CGO_ENABLED=0 go build -ldflags="-s -w" -o gee-bee ./cmd/geebee
+sudo mv gee-bee /usr/local/bin/</code></pre>
+        <p>Or use the bundled <a href="#taskfile">Task</a> commands.</p>
+
+        <div class="callout">
+          💡 <strong>No config file?</strong> Sensible defaults are baked in.
+          You can test drive the app without any configuration by running it
+          directly.
         </div>
       </section>
 
@@ -344,50 +387,44 @@
       <section id="quickstart">
         <h2>Quick Start</h2>
 
-        <h3>1 – Clone and configure</h3>
-        <pre><code>git clone https://github.com/rorpage/gee-bee.git
-cd gee-bee
-cp config.example.yml config.yml
+        <h3>1 – Configure</h3>
+        <pre><code>mkdir -p ~/.config/gee-bee
+cp config.example.yml ~/.config/gee-bee/config.yml
 # Edit config.yml with your tail numbers and webhook URLs</code></pre>
 
-        <h3>2 – Run</h3>
-        <pre><code>task run</code></pre>
-        <p>
-          Or with the Go tool directly:
-        </p>
-        <pre><code>go run cmd/geebee/*</code></pre>
-
-        <h3>3 – Build</h3>
-        <pre><code>task build   # produces gee-bee.exe</code></pre>
-
-        <div class="callout">
-          💡 <strong>No config file?</strong> Sensible defaults are baked in.
-          You can testdrive the app without any configuration by running it
-          directly.
-        </div>
+        <h3>2 – Run once</h3>
+        <pre><code>gee-bee</code></pre>
+        <p>The binary checks for tail numbers currently in range and exits. Set up scheduling below to run it repeatedly.</p>
       </section>
 
-      <!-- ── Docker ── -->
-      <section id="docker">
-        <h2>Docker</h2>
+      <!-- ── Scheduling ── -->
+      <section id="scheduling">
+        <h2>Scheduling</h2>
         <p>
-          A pre-built image is published to the GitHub Container Registry on
-          every push to <code>main</code>. Pull and run it with:
+          Gee Bee is a one-shot job: it runs, checks for tail numbers, and
+          exits. There's no internal loop and no Docker; scheduling is up to
+          cron or a systemd timer.
         </p>
-        <pre><code>docker run --rm \
-  -e TAIL_NUMBERS="28000,29000" \
-  -e DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/…" \
-  ghcr.io/rorpage/gee-bee:latest</code></pre>
 
-        <p>Or with Docker Compose:</p>
-        <pre><code>services:
-  gee-bee:
-    image: ghcr.io/rorpage/gee-bee:latest
-    environment:
-      TAIL_NUMBERS: "28000,29000"
-      DISCORD_WEBHOOK_URL: "https://discord.com/api/webhooks/…"
-      FETCH_INTERVAL: "60"
-    restart: unless-stopped</code></pre>
+        <h3>systemd timer (recommended)</h3>
+        <p>
+          Ready-to-use unit files live in <code>deploy/systemd/</code>. Quick
+          install:
+        </p>
+        <pre><code>curl -fsSL https://raw.githubusercontent.com/rorpage/gee-bee/main/deploy/systemd/install.sh | sudo bash
+sudo nano /etc/gee-bee/env       # set your tail numbers and webhook URL(s)
+sudo systemctl start gee-bee.timer</code></pre>
+        <p>
+          The install script downloads the latest release binary, creates a
+          dedicated <code>gee-bee</code> system user, sets up
+          <code>/etc/gee-bee/</code> and <code>/var/lib/gee-bee/</code>, and
+          enables the timer. Default schedule is every minute
+          (<code>OnCalendar=minutely</code>).
+        </p>
+
+        <h3>cron</h3>
+        <pre><code># crontab -e
+* * * * * DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/... /usr/local/bin/gee-bee</code></pre>
       </section>
 
       <!-- ── Configuration ── -->
@@ -416,16 +453,6 @@ cp config.example.yml config.yml
               <td>
                 Comma-separated list of aircraft registrations (tail numbers) to
                 watch.
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <code>fetchInterval</code><br /><code>FETCH_INTERVAL</code>
-              </td>
-              <td><code>60</code></td>
-              <td>
-                How often (in seconds) to poll the flight API. Values below 60
-                may trigger rate limits.
               </td>
             </tr>
             <tr>
@@ -463,16 +490,32 @@ cp config.example.yml config.yml
                 payload shape.
               </td>
             </tr>
+            <tr>
+              <td>
+                <code>stateFilePath</code><br /><code>STATE_FILE</code>
+              </td>
+              <td><code>~/.config/gee-bee/state.json</code></td>
+              <td>
+                Where to persist the list of currently-spotted aircraft
+                between runs.
+              </td>
+            </tr>
           </tbody>
         </table>
+        <p>
+          <code>CONFIG_FILE</code> can also point at an explicit config file
+          path; by default Gee Bee searches
+          <code>~/.config/gee-bee/</code> then the working directory for
+          <code>config.yml</code>/<code>config.yaml</code>.
+        </p>
 
         <h3>Example config.yml</h3>
         <pre><code>tailNumbers: 28000,29000
-fetchInterval: 60
 logPlanesToConsole: true
 discordWebhookUrl: https://discord.com/api/webhooks/12345/abcdef-ghijkl
 slackWebhookUrl: https://hooks.slack.com/services/random/ids/andstrings
-customWebhookUrl: https://your-custom-url.com/endpoint</code></pre>
+customWebhookUrl: https://your-custom-url.com/endpoint
+stateFilePath: /var/lib/gee-bee/state.json</code></pre>
       </section>
 
       <!-- ── Notifications ── -->
@@ -509,8 +552,7 @@ customWebhookUrl: https://your-custom-url.com/endpoint</code></pre>
         <h3 id="custom-webhook">Custom Webhook</h3>
         <p>
           Set <code>customWebhookUrl</code> to any URL that accepts an HTTP POST
-          with a JSON body. Gee Bee sends the following payload per spotted
-          aircraft:
+          with a JSON body. Gee Bee sends the following payload:
         </p>
         <pre><code>{
   "altitude":      "3,200 m",
@@ -525,6 +567,11 @@ customWebhookUrl: https://your-custom-url.com/endpoint</code></pre>
   "type":          "B744",
   "url":           "https://globe.adsbexchange.com/…"
 }</code></pre>
+        <div class="callout">
+          ⚠️ If more than one tracked aircraft is newly spotted in the same
+          run, only the first is sent to the custom webhook. Discord, Slack,
+          and the console all receive the full batch.
+        </div>
       </section>
 
       <!-- ── Taskfile ── -->
@@ -547,7 +594,7 @@ customWebhookUrl: https://your-custom-url.com/endpoint</code></pre>
           <tbody>
             <tr>
               <td><code>task build</code></td>
-              <td>Compile the app to a <code>gee-bee.exe</code> binary.</td>
+              <td>Compile the app to a <code>gee-bee</code> binary.</td>
             </tr>
             <tr>
               <td><code>task format</code></td>
@@ -558,12 +605,35 @@ customWebhookUrl: https://your-custom-url.com/endpoint</code></pre>
             <tr>
               <td><code>task run</code></td>
               <td>
-                Run the app directly with <code>go run</code>, reading
+                Run the app once with <code>go run</code>, reading
                 configuration from <code>config.yml</code> or env vars.
               </td>
             </tr>
           </tbody>
         </table>
+      </section>
+
+      <!-- ── Versioning ── -->
+      <section id="versioning">
+        <h2>Versioning</h2>
+        <p>
+          Releases are created automatically on every push to
+          <code>main</code>. The version follows CalVer:
+          <code>YYYY.MM.DD.N</code>, where N is the GitHub Actions run number
+          (e.g. <code>2026.07.03.4</code>). No manual tagging required. The
+          version is embedded in the binary at build time:
+        </p>
+        <pre><code>gee-bee --version
+# 2026.07.03.4</code></pre>
+        <p>
+          The latest release is always available at
+          <a
+            href="https://github.com/rorpage/gee-bee/releases/latest"
+            target="_blank"
+            rel="noopener"
+            >github.com/rorpage/gee-bee/releases/latest</a
+          >.
+        </p>
       </section>
 
       <!-- ── License ── -->
