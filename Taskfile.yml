@@ -3,7 +3,7 @@ version: '3'
 tasks:
   build:
     cmds:
-      - go build -o gee-bee.exe cmd/geebee/*
+      - go build -o gee-bee ./cmd/geebee
 
   format:
     cmds:
@@ -11,4 +11,4 @@ tasks:
 
   run:
     cmds:
-      - go run cmd/geebee/*
+      - go run ./cmd/geebee

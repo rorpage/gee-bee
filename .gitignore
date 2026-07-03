@@ -26,8 +26,11 @@ go.work.sum
 
 *config.yml*
 *config.yaml*
+state.json
 
+gee-bee
 gee-bee.exe
 main.exe
 
 /pkg/
+/dist/
