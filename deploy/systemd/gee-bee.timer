@@ -1,0 +1,10 @@
+[Unit]
+Description=Gee Bee tail number spotter -- run every minute
+Documentation=https://github.com/rorpage/gee-bee
+
+[Timer]
+OnCalendar=minutely
+Persistent=true
+
+[Install]
+WantedBy=timers.target

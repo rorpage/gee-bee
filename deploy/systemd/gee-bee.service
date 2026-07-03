@@ -1,0 +1,13 @@
+[Unit]
+Description=Gee Bee tail number spotter
+Documentation=https://github.com/rorpage/gee-bee
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=gee-bee
+EnvironmentFile=/etc/gee-bee/env
+ExecStart=/usr/local/bin/gee-bee
+StandardOutput=journal
+StandardError=journal
